@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 40px;
+            color: #333;
+        }
+        h1 {
+            color: #0056b3;
+        }
+        p {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        span {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+    <script>
+    $(document).ready(function(){
+        function actualizarTemperatura() {
+            $.ajax({
+                url: '/ultima-temperatura/',
+                type: 'GET',
+                success: function(data) {
+                    $('#temperatura').text(data.temperatura + ' °C');
+                    $('#fecha').text('Última actualización: ' + data.fecha);
+                }
+            });
+        }
+        actualizarTemperatura();
+        setInterval(actualizarTemperatura, 5000);
+    });
+    </script>
+</head>
+<body>
+    <h1>Panel de Control</h1>
+    <p>Temperatura actual: <span id="temperatura">Cargando...</span></p>
+    <p><span id="fecha"></span></p>
+    <canvas id="graficoTemperatura" width="400" height="200"></canvas>
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('graficoTemperatura').getContext('2d');
+    fetch('/ruta-a-datos-temperatura/')
+        .then(response => response.json())
+        .then(data => {
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.fechas,
+                    datasets: [{
+                        label: 'Temperatura',
+                        backgroundColor: 'rgb(255, 99, 132)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        data: data.temperaturas,
+                        fill: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        xAxes: [{
+                            type: 'time',
+                            time: {
+                                unit: 'day'
+                            },
+                            display: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Fecha'
+                            }
+                        }],
+                        yAxes: [{
+                            display: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Temperatura (°C)'
+                            }
+                        }]
+                    }
+                }
+            });
+        });
+});
+</script>
+
+</body>
+</html>
