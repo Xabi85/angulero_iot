@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-from .models import LecturaTemperatura, LecturaTemperatura2
+from .models import LecturaTemperatura, LecturaTemperatura2, EstadoTurbinas
 
 API_KEY = 'abcd'
 
@@ -96,3 +96,57 @@ def datos_temperatura2(request):
         'temperaturas': [registro.temperatura for registro in registros]
     }
     return JsonResponse(data)
+
+
+def estado_turbinas_actual(request):
+    # Obtener el último estado de las turbinas
+    ultimo_estado = EstadoTurbinas.objects.order_by('-fecha').first()
+    if ultimo_estado:
+        fecha_local = timezone.localtime(ultimo_estado.fecha)
+        data = {
+            'turbina1': ultimo_estado.turbina1,
+            'turbina2': ultimo_estado.turbina2,
+            'turbina3': ultimo_estado.turbina3,
+            'turbina4': ultimo_estado.turbina4,
+            'nivel_agua_suficiente': ultimo_estado.nivel_agua_suficiente,
+            'fecha': fecha_local.strftime('%Y-%m-%d %H:%M:%S')
+        }
+    else:
+        data = {
+            'turbina1': 'No disponible',
+            'turbina2': 'No disponible',
+            'turbina3': 'No disponible',
+            'turbina4': 'No disponible',
+            'nivel_agua_suficiente': 'No disponible',
+            'fecha': 'Sin datos'
+        }
+
+    return JsonResponse(data)
+
+@csrf_exempt
+def recibir_estado_turbinas(request):
+    # Verificar la clave de API en el encabezado
+    api_key = request.headers.get('Authorization')
+    if api_key != API_KEY:
+        return JsonResponse({'status': 'unauthorized', 'error': 'Clave de API incorrecta'}, status=401)
+
+    if request.method == 'POST':
+        try:
+            turbina1 = request.POST.get('turbina1') == 'true'
+            turbina2 = request.POST.get('turbina2') == 'true'
+            turbina3 = request.POST.get('turbina3') == 'true'
+            turbina4 = request.POST.get('turbina4') == 'true'
+            nivel_agua_suficiente = request.POST.get('nivel_agua_suficiente') == 'true'
+
+            EstadoTurbinas.objects.create(
+                turbina1=turbina1,
+                turbina2=turbina2,
+                turbina3=turbina3,
+                turbina4=turbina4,
+                nivel_agua_suficiente=nivel_agua_suficiente
+            )
+            return JsonResponse({'status': 'success'})
+        except ValueError:
+            return JsonResponse({'status': 'bad request', 'error': 'Datos inválidos'}, status=400)
+    else:
+        return JsonResponse({'status': 'bad request', 'error': 'Método no permitido'}, status=405)

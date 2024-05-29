@@ -28,4 +28,6 @@ urlpatterns = [
     path('recibir-temperatura2/',views.recibir_temperatura2, name='recibir_temperatura2'),
     path('ruta-a-datos-temperatura/', views.datos_temperatura, name='datos_temperatura'),
     path('ruta-a-datos-temperatura2/', views.datos_temperatura2, name='datos_temperatura2'),
+    path('estado-turbinas-actual/', views.estado_turbinas_actual, name='estado_turbinas_actual'),
+    path('recibir-estado-turbinas/', views.recibir_estado_turbinas, name='recibir_estado_turbinas'),
 ]
