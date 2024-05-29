@@ -6,12 +6,12 @@ from django.utils import timezone
 from .models import LecturaTemperatura2
 API_KEY = 'abcd'
 
-
-
-
 def panel_control(request):
-    lecturas = LecturaTemperatura.objects.all()
-    return render(request, 'sensorapp/panel_control.html', {'lecturas': lecturas})
+    lecturas1 = LecturaTemperatura.objects.all()
+    lecturas2 = LecturaTemperatura2.objects.all()
+    return render(request, 'sensorapp/panel_control.html', {'lecturas1': lecturas1, 'lecturas2': lecturas2})
+
+
 
 @csrf_exempt
 def recibir_temperatura(request):
