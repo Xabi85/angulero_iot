@@ -55,6 +55,16 @@
             </div>
         </div>
         <div class="row">
+            <div class="col-12 data-section">
+                <p>Estado Turbina 1: <span id="turbina1">Cargando...</span></p>
+                <p>Estado Turbina 2: <span id="turbina2">Cargando...</span></p>
+                <p>Estado Turbina 3: <span id="turbina3">Cargando...</span></p>
+                <p>Estado Turbina 4: <span id="turbina4">Cargando...</span></p>
+                <p>Nivel Agua Suficiente: <span id="nivel_agua_suficiente">Cargando...</span></p>
+                <p><span id="fecha_turbinas"></span></p>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-12 chart-section">
                 <div class="chart-container">
                     <canvas id="graficoTemperatura"></canvas>
@@ -81,6 +91,23 @@
             actualizarTemperatura('', '#temperatura1', '#fecha1');
             actualizarTemperatura('2', '#temperatura2', '#fecha2');
         }, 5000);
+
+        function actualizarEstadoTurbinas() {
+            $.ajax({
+                url: '/estado-turbinas-actual/',
+                type: 'GET',
+                success: function(data) {
+                    $('#turbina1').text(data.turbina1 ? 'Encendida' : 'Apagada');
+                    $('#turbina2').text(data.turbina2 ? 'Encendida' : 'Apagada');
+                    $('#turbina3').text(data.turbina3 ? 'Encendida' : 'Apagada');
+                    $('#turbina4').text(data.turbina4 ? 'Encendida' : 'Apagada');
+                    $('#nivel_agua_suficiente').text(data.nivel_agua_suficiente ? 'Suficiente' : 'Insuficiente');
+                    $('#fecha_turbinas').text('Última actualización: ' + data.fecha);
+                }
+            });
+        }
+        actualizarEstadoTurbinas();
+        setInterval(actualizarEstadoTurbinas, 5000);
 
         const ctx = document.getElementById('graficoTemperatura').getContext('2d');
         Promise.all([
