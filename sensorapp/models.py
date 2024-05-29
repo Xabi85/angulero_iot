@@ -17,3 +17,11 @@ class LecturaTemperatura2(models.Model):
 
     class Meta:
         app_label = 'sensorapp'
+
+class EstadoTurbinas(models.Model):
+    fecha = models.DateTimeField(auto_now_add=True)
+    turbina1 = models.BooleanField(default=False)
+    turbina2 = models.BooleanField(default=False)
+    turbina3 = models.BooleanField(default=False)
+    turbina4 = models.BooleanField(default=False)
+    nivel_agua_suficiente = models.BooleanField(default=False)
