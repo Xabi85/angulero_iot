@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráfico Temperatura Sensores</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Gráfico Temperatura Sensores</h1>
+        <div class="chart-container" style="position: relative; height:60vh; width:80vw">
+            <canvas id="detalleGraficoTemperatura"></canvas>
+        </div>
+        <a href="{% url 'panel_control' %}" class="btn btn-secondary mt-3">Volver al Panel de Control</a>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('detalleGraficoTemperatura').getContext('2d');
+        const fechas1 = {{ fechas1|safe }};
+        const temperaturas1 = {{ temperaturas1|safe }};
+        const fechas2 = {{ fechas2|safe }};
+        const temperaturas2 = {{ temperaturas2|safe }};
+
+        const data = {
+            labels: fechas1, // Utilizando las fechas del primer sensor
+            datasets: [{
+                label: 'Temperatura Sensor 1',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                data: temperaturas1,
+                fill: false,
+            },
+            {
+                label: 'Temperatura Sensor 2',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                data: temperaturas2,
+                fill: false,
+            }]
+        };
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day'
+                        },
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Fecha'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Temperatura (°C)'
+                        }
+                    }
+                }
+            }
+        };
+        new Chart(ctx, config);
+    });
+    </script>
+</body>
+</html>

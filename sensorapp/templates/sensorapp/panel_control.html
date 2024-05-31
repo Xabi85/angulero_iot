@@ -81,7 +81,10 @@
             font-size: 1.5rem;
             font-weight: bold;
             color: #343a40;
-            width: 150px; /* Añadido para alineación */
+            width: 150px;
+        }
+        .detail-button {
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -90,15 +93,24 @@
         <h1>Panel de Control</h1>
         <div class="row">
             <div class="col-md-6 temperature-block data-section">
-                <p>Temperatura actual (Sensor 1): <span class="value" id="temperatura1">Cargando...</span></p>
+                <p>
+                    Temperatura actual (Sensor 1): <span class="value" id="temperatura1">Cargando...</span>
+                </p>
                 <p><span class="date" id="fecha1"></span></p>
             </div>
             <div class="col-md-6 temperature-block data-section">
-                <p>Temperatura actual (Sensor 2): <span class="value" id="temperatura2">Cargando...</span></p>
+                <p>
+                    Temperatura actual (Sensor 2): <span class="value" id="temperatura2">Cargando...</span>
+                </p>
                 <p><span class="date" id="fecha2"></span></p>
             </div>
         </div>
-        <div class="row turbine-block data-section">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <a href="{% url 'grafico_temperatura' %}" class="btn btn-primary btn-sm detail-button">Ver Gráfico de Temperaturas</a>
+            </div>
+        </div>
+        <div class="row turbine-block data-section mt-4">
             <div class="col-md-12">
                 <div class="status-container">
                     <span class="turbine-label">Turbina 1</span>
@@ -179,7 +191,7 @@
             const chart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: data1.fechas,
+                    labels: data1.fechas, // Suponiendo que ambas listas de fechas son iguales
                     datasets: [{
                         label: 'Temperatura Sensor 1',
                         backgroundColor: 'rgba(255, 99, 132, 0.2)',

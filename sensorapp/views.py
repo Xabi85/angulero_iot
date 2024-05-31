@@ -2,10 +2,12 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 from .models import LecturaTemperatura, LecturaTemperatura2, EstadoTurbinas
 
 API_KEY = 'abcd'
 
+@login_required
 def panel_control(request):
     lecturas1 = LecturaTemperatura.objects.all()
     lecturas2 = LecturaTemperatura2.objects.all()
@@ -150,3 +152,24 @@ def recibir_estado_turbinas(request):
             return JsonResponse({'status': 'bad request', 'error': 'Datos inválidos'}, status=400)
     else:
         return JsonResponse({'status': 'bad request', 'error': 'Método no permitido'}, status=405)
+
+
+
+
+@login_required
+def grafico_temperatura(request):
+    lecturas1 = LecturaTemperatura.objects.all().order_by('fecha')
+    lecturas2 = LecturaTemperatura2.objects.all().order_by('fecha')
+
+    fechas1 = [lectura.fecha.strftime("%Y-%m-%d %H:%M:%S") for lectura in lecturas1]
+    temperaturas1 = [lectura.temperatura for lectura in lecturas1]
+    fechas2 = [lectura.fecha.strftime("%Y-%m-%d %H:%M:%S") for lectura in lecturas2]
+    temperaturas2 = [lectura.temperatura for lectura in lecturas2]
+
+    context = {
+        'fechas1': fechas1,
+        'temperaturas1': temperaturas1,
+        'fechas2': fechas2,
+        'temperaturas2': temperaturas2,
+    }
+    return render(request, 'sensorapp/grafico_temperatura.html', context)

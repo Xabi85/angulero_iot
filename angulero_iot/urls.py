@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from sensorapp import views
+from django.contrib.auth.views import LoginView, LogoutView
 
 
 urlpatterns = [
@@ -30,4 +31,8 @@ urlpatterns = [
     path('ruta-a-datos-temperatura2/', views.datos_temperatura2, name='datos_temperatura2'),
     path('estado-turbinas-actual/', views.estado_turbinas_actual, name='estado_turbinas_actual'),
     path('recibir-estado-turbinas/', views.recibir_estado_turbinas, name='recibir_estado_turbinas'),
+    path('grafico-temperatura/', views.grafico_temperatura, name='grafico_temperatura'),
+    path('admin/', admin.site.urls),
+    path('login/', LoginView.as_view(template_name='login.html'), name='login'),
+    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
 ]
