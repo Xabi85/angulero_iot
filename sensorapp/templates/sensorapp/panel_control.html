@@ -113,26 +113,26 @@
         <div class="row turbine-block data-section mt-4">
             <div class="col-md-12">
                 <div class="status-container">
-                    <span class="turbine-label">Turbina 1</span>
-                    <i class="status-indicator" id="turbina1">Cargando...</i>
+                    <span class="turbine-label">Motor 1</span>
+                    <i class="status-indicator" id="motor1">Cargando...</i>
                 </div>
                 <div class="status-container">
-                    <span class="turbine-label">Turbina 2</span>
-                    <i class="status-indicator" id="turbina2">Cargando...</i>
+                    <span class="turbine-label">Motor 2</span>
+                    <i class="status-indicator" id="motor2">Cargando...</i>
                 </div>
                 <div class="status-container">
-                    <span class="turbine-label">Turbina 3</span>
-                    <i class="status-indicator" id="turbina3">Cargando...</i>
+                    <span class="turbine-label">Motor 3</span>
+                    <i class="status-indicator" id="motor3">Cargando...</i>
                 </div>
                 <div class="status-container">
-                    <span class="turbine-label">Turbina 4</span>
-                    <i class="status-indicator" id="turbina4">Cargando...</i>
+                    <span class="turbine-label">Motor 4</span>
+                    <i class="status-indicator" id="motor4">Cargando...</i>
                 </div>
                 <div class="status-container">
                     <span class="turbine-label">Nivel Agua</span>
                     <i class="status-indicator" id="nivel_agua_suficiente">Cargando...</i>
                 </div>
-                <p><span class="date" id="fecha_turbinas"></span></p>
+                <p><span class="date" id="fecha_motores"></span></p>
             </div>
         </div>
         <div class="row">
@@ -164,23 +164,23 @@
             actualizarTemperatura('2', '#temperatura2', '#fecha2');
         }, 5000);
 
-        function actualizarEstadoTurbinas() {
+        function actualizarEstadoMotores() {
             $.ajax({
-                url: '/estado-turbinas-actual/',
+                url: '/estado-motores-actual/',
                 type: 'GET',
                 success: function(data) {
-                    $('#turbina1').html(data.turbina1 ? '<i class="status-indicator on fas fa-circle"></i>' : '<i class="status-indicator off fas fa-circle"></i>');
-                    $('#turbina2').html(data.turbina2 ? '<i class="status-indicator on fas fa-circle"></i>' : '<i class="status-indicator off fas fa-circle"></i>');
-                    $('#turbina3').html(data.turbina3 ? '<i class="status-indicator on fas fa-circle"></i>' : '<i class="status-indicator off fas fa-circle"></i>');
-                    $('#turbina4').html(data.turbina4 ? '<i class="status-indicator on fas fa-circle"></i>' : '<i class="status-indicator off fas fa-circle"></i>');
+                    $('#motor1').html(data.motor1 ? '<i class="status-indicator on fas fa-circle"></i>' : '<i class="status-indicator off fas fa-circle"></i>');
+                    $('#motor2').html(data.motor2 ? '<i class="status-indicator on fas fa-circle"></i>' : '<i class="status-indicator off fas fa-circle"></i>');
+                    $('#motor3').html(data.motor3 ? '<i class="status-indicator on fas fa-circle"></i>' : '<i class="status-indicator off fas fa-circle"></i>');
+                    $('#motor4').html(data.motor4 ? '<i class="status-indicator on fas fa-circle"></i>' : '<i class="status-indicator off fas fa-circle"></i>');
                     $('#nivel_agua_suficiente').html(data.nivel_agua_suficiente ? '<i class="status-indicator on fas fa-circle"></i>' : '<i class="status-indicator off fas fa-circle"></i>');
                     const fecha = new Date(data.fecha).toLocaleString('es-ES', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' });
-                    $('#fecha_turbinas').text('Última actualización: ' + fecha);
+                    $('#fecha_motores').text('Última actualización: ' + fecha);
                 }
             });
         }
-        actualizarEstadoTurbinas();
-        setInterval(actualizarEstadoTurbinas, 5000);
+        actualizarEstadoMotores();
+        setInterval(actualizarEstadoMotores, 5000);
 
         const ctx = document.getElementById('graficoTemperatura').getContext('2d');
         Promise.all([
@@ -191,7 +191,7 @@
             const chart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: data1.fechas, // Suponiendo que ambas listas de fechas son iguales
+                    labels: data1.fechas,
                     datasets: [{
                         label: 'Temperatura Sensor 1',
                         backgroundColor: 'rgba(255, 99, 132, 0.2)',
@@ -205,7 +205,7 @@
                         borderColor: 'rgba(54, 162, 235, 1)',
                         data: data2.temperaturas,
                         fill: false,
-                    }]
+                      }]
                 },
                 options: {
                     responsive: true,
