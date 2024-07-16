@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 class LecturaTemperatura(models.Model):
-    fecha = models.DateTimeField(auto_now_add=True)
+    fecha = models.DateTimeField()
     temperatura = models.FloatField()
     
 

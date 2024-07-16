@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
+from django.utils.dateparse import parse_datetime
 from .models import LecturaTemperatura, LecturaTemperatura2, EstadoMotores
 from datetime import datetime
 import json
@@ -20,23 +21,53 @@ def panel_control(request):
 
 @csrf_exempt
 def recibir_temperatura(request):
-    api_key = request.headers.get('Authorization')
-    if api_key != API_KEY:
-        return JsonResponse({'status': 'unauthorized', 'error': 'Clave de API incorrecta'}, status=401)
-
     if request.method == 'POST':
-        temperatura = request.POST.get('temperatura')
-        if temperatura is not None:
-            try:
-                temperatura_float = float(temperatura)
-                LecturaTemperatura.objects.create(temperatura=temperatura_float)
-                return JsonResponse({'status': 'success'})
-            except ValueError:
-                return JsonResponse({'status': 'bad request', 'error': 'Temperatura inválida'}, status=400)
-        else:
-            return JsonResponse({'status': 'bad request', 'error': 'Temperatura no proporcionada'}, status=400)
+        try:
+            api_key = request.headers.get('Authorization')
+            if api_key != API_KEY:
+                return JsonResponse({'status': 'unauthorized', 'error': 'Clave de API incorrecta'}, status=401)
+
+            if request.META.get('CONTENT_TYPE') == 'application/json':
+                data = json.loads(request.body.decode('utf-8'))
+                print(f"Received JSON data: {data}")
+                temperatura = data.get('temperatura')
+                fecha = data.get('fecha')
+            else:
+                temperatura = request.POST.get('temperatura')
+                fecha = request.POST.get('fecha')
+                print(f"Received form data: temperatura={temperatura}, fecha={fecha}")
+
+            if temperatura is None or fecha is None:
+                return JsonResponse({'status': 'bad request', 'error': 'Temperatura o fecha no proporcionada'}, status=400)
+
+            temperatura = float(temperatura)
+
+            print(f"Parsed data: temperatura={temperatura}, fecha={fecha}")
+
+            # Ajustar el formato de fecha para coincidir con el formato de PUBLISHED_AT
+            utc_time = datetime.strptime(fecha, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+            # Convertir de UTC a la hora local de Madrid
+            utc_zone = pytz.timezone('UTC')
+            local_zone = pytz.timezone('Europe/Madrid')
+
+            utc_time = utc_zone.localize(utc_time)
+            local_time = utc_time.astimezone(local_zone)
+
+            LecturaTemperatura.objects.create(
+                fecha=local_time,
+                temperatura=temperatura
+            )
+            return JsonResponse({'status': 'success'})
+        except ValueError as e:
+            print(f"Error processing data: {e}")
+            return JsonResponse({'status': 'bad request', 'error': 'Datos inválidos o formato de fecha incorrecto'}, status=400)
+        except Exception as e:
+            print(f"Error processing data: {e}")
+            return JsonResponse({'status': 'bad request', 'error': str(e)}, status=400)
     else:
         return JsonResponse({'status': 'bad request', 'error': 'Método no permitido'}, status=405)
+
 
 def ultima_temperatura(request):
     ultima_lectura = LecturaTemperatura.objects.order_by('-fecha').first()
