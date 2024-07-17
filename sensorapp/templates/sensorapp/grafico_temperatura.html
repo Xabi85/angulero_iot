@@ -29,19 +29,41 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
         .btn-container {
             text-align: center;
             margin-top: 20px;
+        }
+        .date-input-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .date-input-container input {
+            margin: 0 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Gráfico Temperatura Sensores</h1>
-        <div class="chart-container">
-            <canvas id="detalleGraficoTemperatura"></canvas>
+
+        <div class="date-input-container">
+            <label for="start-date">Fecha Inicio:</label>
+            <input type="date" id="start-date">
+            <label for="end-date">Fecha Fin:</label>
+            <input type="date" id="end-date">
+            <button id="filter-button" class="btn btn-primary">Filtrar</button>
         </div>
+
+        <div class="chart-container">
+            <canvas id="graficoTemperatura1"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="graficoTemperatura2"></canvas>
+        </div>
+        
         <div class="btn-container">
             <a href="{% url 'panel_control' %}" class="btn btn-secondary mt-3">Volver al Panel de Control</a>
         </div>
@@ -49,28 +71,27 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('detalleGraficoTemperatura').getContext('2d');
-        Promise.all([
-            fetch('/ruta-a-datos-temperatura/').then(response => response.json()),
-            fetch('/ruta-a-datos-temperatura2/').then(response => response.json())
-        ]).then(data => {
-            const [data1, data2] = data;
-            const chart = new Chart(ctx, {
+        const ctx1 = document.getElementById('graficoTemperatura1').getContext('2d');
+        const ctx2 = document.getElementById('graficoTemperatura2').getContext('2d');
+
+        function fetchAndUpdateChart(url, chart, label, backgroundColor, borderColor) {
+            fetch(url).then(response => response.json()).then(data => {
+                chart.data.labels = data.fechas;
+                chart.data.datasets[0].data = data.temperaturas;
+                chart.update();
+            });
+        }
+
+        function createChart(ctx, label, backgroundColor, borderColor) {
+            return new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: data1.fechas, // Utilizando las fechas del primer sensor
+                    labels: [],
                     datasets: [{
-                        label: 'Temperatura Sensor 1',
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        data: data1.temperaturas,
-                        fill: false,
-                    },
-                    {
-                        label: 'Temperatura Sensor 2',
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        data: data2.temperaturas,
+                        label: label,
+                        backgroundColor: backgroundColor,
+                        borderColor: borderColor,
+                        data: [],
                         fill: false,
                     }]
                 },
@@ -99,7 +120,31 @@
                     }
                 }
             });
+        }
+
+        const chart1 = createChart(ctx1, 'Camara 1', 'rgba(255, 99, 132, 0.2)', 'rgba(255, 99, 132, 1)');
+        const chart2 = createChart(ctx2, 'Camara 2', 'rgba(54, 162, 235, 0.2)', 'rgba(54, 162, 235, 1)');
+
+        function updateCharts(startDate, endDate) {
+            const url1 = `/datos-temperatura-filtrado/?start=${startDate}&end=${endDate}`;
+            const url2 = `/datos-temperatura2-filtrado/?start=${startDate}&end=${endDate}`;
+            fetchAndUpdateChart(url1, chart1, 'Camara 1', 'rgba(255, 99, 132, 0.2)', 'rgba(255, 99, 132, 1)');
+            fetchAndUpdateChart(url2, chart2, 'Camara 2', 'rgba(54, 162, 235, 0.2)', 'rgba(54, 162, 235, 1)');
+        }
+
+        document.getElementById('filter-button').addEventListener('click', function() {
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            updateCharts(startDate, endDate);
         });
+
+        // Fetch initial data for the last 7 days
+        const now = new Date();
+        const endDate = now.toISOString().split('T')[0];
+        const startDate = new Date(now.setDate(now.getDate() - 7)).toISOString().split('T')[0];
+        document.getElementById('start-date').value = startDate;
+        document.getElementById('end-date').value = endDate;
+        updateCharts(startDate, endDate);
     });
     </script>
 </body>
