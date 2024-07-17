@@ -56,6 +56,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
         .status-indicator {
             font-size: 2.5rem;
@@ -138,7 +139,12 @@
         <div class="row">
             <div class="col-12 chart-section">
                 <div class="chart-container">
-                    <canvas id="graficoTemperatura"></canvas>
+                    <canvas id="graficoTemperatura1"></canvas>
+                </div>
+            </div>
+            <div class="col-12 chart-section">
+                <div class="chart-container">
+                    <canvas id="graficoTemperatura2"></canvas>
                 </div>
             </div>
         </div>
@@ -182,57 +188,51 @@
         actualizarEstadoMotores();
         setInterval(actualizarEstadoMotores, 5000);
 
-        const ctx = document.getElementById('graficoTemperatura').getContext('2d');
-        Promise.all([
-            fetch('/ruta-a-datos-temperatura/').then(response => response.json()),
-            fetch('/ruta-a-datos-temperatura2/').then(response => response.json())
-        ]).then(data => {
-            const [data1, data2] = data;
-            const chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data1.fechas, // Suponiendo que ambas listas de fechas son iguales
-                    datasets: [{
-                        label: 'Temperatura Sensor 1',
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        data: data1.temperaturas,
-                        fill: false,
+        function crearGraficoTemperatura(canvasId, url, label, backgroundColor, borderColor) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            fetch(url).then(response => response.json()).then(data => {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.fechas,
+                        datasets: [{
+                            label: label,
+                            backgroundColor: backgroundColor,
+                            borderColor: borderColor,
+                            data: data.temperaturas,
+                            fill: false,
+                        }]
                     },
-                    {
-                        label: 'Temperatura Sensor 2',
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        data: data2.temperaturas,
-                        fill: false,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'day'
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'day'
+                                },
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Fecha'
+                                }
                             },
-                            display: true,
-                            title: {
+                            y: {
                                 display: true,
-                                text: 'Fecha'
-                            }
-                        },
-                        y: {
-                            display: true,
-                            title: {
-                                display: true,
-                                text: 'Temperatura (°C)'
+                                title: {
+                                    display: true,
+                                    text: 'Temperatura (°C)'
+                                }
                             }
                         }
                     }
-                }
+                });
             });
-        });
+        }
+
+        crearGraficoTemperatura('graficoTemperatura1', '/ruta-a-datos-temperatura/', 'Camara 1', 'rgba(255, 99, 132, 0.2)', 'rgba(255, 99, 132, 1)');
+        crearGraficoTemperatura('graficoTemperatura2', '/ruta-a-datos-temperatura2/', 'Camara 2', 'rgba(54, 162, 235, 0.2)', 'rgba(54, 162, 235, 1)');
     });
     </script>
 </body>
