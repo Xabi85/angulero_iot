@@ -240,3 +240,40 @@ def grafico_temperatura(request):
         'temperaturas2': temperaturas2,
     }
     return render(request, 'sensorapp/grafico_temperatura.html', context)
+
+
+def datos_temperatura_filtrado(request):
+    start_date = request.GET.get('start')
+    end_date = request.GET.get('end')
+    if start_date and end_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date, '%Y-%m-%d') + timezone.timedelta(days=1)
+    else:
+        end_date = timezone.now()
+        start_date = end_date - timezone.timedelta(days=7)
+    
+    registros = LecturaTemperatura.objects.filter(fecha__gte=start_date, fecha__lt=end_date).order_by('fecha')
+
+    data = {
+        'fechas': [registro.fecha.strftime("%Y-%m-%d %H:%M:%S") for registro in registros],
+        'temperaturas': [registro.temperatura for registro in registros]
+    }
+    return JsonResponse(data)
+
+def datos_temperatura2_filtrado(request):
+    start_date = request.GET.get('start')
+    end_date = request.GET.get('end')
+    if start_date and end_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date, '%Y-%m-%d') + timezone.timedelta(days=1)
+    else:
+        end_date = timezone.now()
+        start_date = end_date - timezone.timedelta(days=7)
+    
+    registros = LecturaTemperatura2.objects.filter(fecha__gte=start_date, fecha__lt=end_date).order_by('fecha')
+
+    data = {
+        'fechas': [registro.fecha.strftime("%Y-%m-%d %H:%M:%S") for registro in registros],
+        'temperaturas': [registro.temperatura for registro in registros]
+    }
+    return JsonResponse(data)

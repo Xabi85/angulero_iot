@@ -35,4 +35,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+    path('datos-temperatura-filtrado/', views.datos_temperatura_filtrado, name='datos_temperatura_filtrado'),
+    path('datos-temperatura2-filtrado/', views.datos_temperatura2_filtrado, name='datos_temperatura2_filtrado'),
 ]
